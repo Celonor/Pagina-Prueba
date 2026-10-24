@@ -1,0 +1,835 @@
+:root {
+      --font-grotesque: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-didone: 'Bodoni Moda', Georgia, serif;
+      --font-serif: 'Playfair Display', Georgia, serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background-color: #ffffff;
+      color: #000000;
+      font-family: var(--font-grotesque);
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .grotesque-display {
+      font-family: var(--font-grotesque);
+      font-weight: 800;
+      letter-spacing: -0.048em;
+      line-height: 0.85;
+    }
+
+    .grotesque-tight {
+      font-family: var(--font-grotesque);
+      font-weight: 700;
+      letter-spacing: -0.038em;
+      line-height: 0.94;
+    }
+
+    /* =========================================================================
+       1. INITIAL PAGE PRELOADER WHITE CURTAIN
+       ========================================================================= */
+    #preloaderBackdrop {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 64;
+      pointer-events: none;
+      transition: opacity 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #preloaderBackdrop.is-hidden {
+      opacity: 0;
+    }
+
+    /* =========================================================================
+       2. UNIFIED GPU-ACCELERATED AXIS: ARCHIVE — & — VAULT
+       ========================================================================= */
+    #unifiedAxisLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 92; /* Above #contactOverlay (90), below #mobileMenuBtn (100) */
+      mix-blend-mode: difference;
+      color: #ffffff;
+      will-change: opacity;
+    }
+
+    #unifiedAxisLayer.blend-normal {
+      mix-blend-mode: normal;
+      color: #000000;
+    }
+
+    #unifiedAxisLayer.blend-overlay-white {
+      mix-blend-mode: normal;
+      color: #ffffff;
+    }
+
+    .axis-word-gpu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      font-family: var(--font-grotesque);
+      font-weight: 800;
+      font-size: 100px; /* Base 100px scale reference */
+      line-height: 0.79;
+      letter-spacing: -0.052em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      user-select: none;
+      transform-origin: 0% 100%;
+      will-change: transform, clip-path;
+    }
+
+    /* =========================================================================
+       3. TOP-RIGHT NAVIGATION WITH SLIDING UNDERLINE & OPTICAL DIFFERENCE BLEND
+       ========================================================================= */
+    .top-nav-blend {
+      position: fixed;
+      top: 14px;
+      right: 18px;
+      z-index: 96;
+      mix-blend-mode: difference;
+      color: #ffffff;
+    }
+
+    .nav-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-link {
+      position: relative;
+      font-weight: 700;
+      font-size: clamp(14px, 1.15vw, 18px);
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding-bottom: 3px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-link:hover {
+      opacity: 0.78;
+    }
+
+    #navUnderline {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background-color: #ffffff;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                  width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+
+    /* =========================================================================
+       4. TWO-STAGE BLUR TRANSITION STAGE
+       ========================================================================= */
+    #mainViewStage {
+      filter: blur(0px);
+      opacity: 1;
+      transition: filter 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: filter, opacity;
+    }
+
+    #mainViewStage.stage-blurred {
+      filter: blur(30px);
+      opacity: 0.16;
+    }
+
+    /* Fluid fade for Fixed Home HUD when changing views without breaking viewport position */
+    #reelHudFixed {
+      transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, filter, transform;
+    }
+    #reelHudFixed.hud-fade-out {
+      opacity: 0 !important;
+      filter: blur(20px);
+    }
+
+    /* =========================================================================
+       5. HOME REEL STICKY WIPE STACK & SYNCHRONIZED TYPOGRAPHY HUD
+       ========================================================================= */
+    .reel-sticky-slide {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #0a0a0c;
+      box-shadow: 0 -28px 64px rgba(0, 0, 0, 0.42);
+      will-change: transform;
+    }
+
+    /* Reduce scroll distance needed per video by 32% (68vh per transition) */
+    .campaign-sticky-slide + .campaign-sticky-slide,
+    #letsRaiseStickySlide {
+      margin-top: -32vh;
+    }
+
+    .reel-slide-media-inner {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      will-change: transform, filter;
+      transform-origin: 50% 50%;
+    }
+
+    .reel-shot-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity;
+    }
+
+    .reel-shot-frame.active-frame {
+      opacity: 1;
+    }
+
+    .reel-hud-word-left {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #ffffff;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.32);
+      font-family: var(--font-grotesque);
+      font-weight: 800;
+      font-size: 100px;
+      letter-spacing: -0.048em;
+      line-height: 0.84;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform-origin: 0% 0%;
+      will-change: transform, opacity;
+    }
+
+    .reel-hud-word-right {
+      position: absolute;
+      right: 0;
+      top: 0;
+      color: #ffffff;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.32);
+      font-family: var(--font-grotesque);
+      font-weight: 800;
+      font-size: 100px;
+      letter-spacing: -0.048em;
+      line-height: 0.84;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform-origin: 100% 0%;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================================================
+       6. SERVICES SPLIT AT 50VH (DUAL COLOR: ORANGE ON VIDEO / BLACK ON MARGIN)
+       ========================================================================= */
+    .services-stage {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      padding: 12vh 0 16vh 0;
+      overflow: hidden;
+      z-index: 30;
+    }
+
+    .services-photo-box {
+      position: relative;
+      width: 76vw;
+      max-width: 1280px;
+      height: 128vh;
+      margin: 0 auto;
+      overflow: hidden;
+      background: #0d62be;
+      will-change: transform;
+    }
+
+    .services-rows-master {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100vw;
+      height: 128vh;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .service-row-line {
+      position: relative;
+      width: 100vw;
+      height: clamp(2.55rem, 5.45vw, 6.0rem);
+      font-size: clamp(2.5rem, 5.4vw, 5.9rem);
+      font-weight: 700;
+      letter-spacing: -0.042em;
+      line-height: 0.96;
+      white-space: nowrap;
+    }
+
+    .srv-left-word {
+      position: absolute;
+      left: 18px;
+      top: 0;
+      text-align: left;
+      transform-origin: 0% 55%;
+      will-change: transform, opacity;
+    }
+
+    .srv-right-word {
+      position: absolute;
+      right: 28px;
+      top: 0;
+      text-align: right;
+      transform-origin: 100% 55%;
+      will-change: transform, opacity;
+    }
+
+    /* =========================================================================
+       7. CLIENT ROSTER PARTING AROUND '&'
+       ========================================================================= */
+    .roster-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+      width: 100%;
+      padding: 1px 0;
+    }
+
+    .roster-left-cell {
+      text-align: right;
+      padding-right: 5px;
+      will-change: transform;
+    }
+
+    .roster-right-cell {
+      text-align: left;
+      padding-left: 5px;
+      will-change: transform;
+    }
+
+    /* =========================================================================
+       8. WORK GRID HOVER BLUR CHOREOGRAPHY
+       ========================================================================= */
+    .work-grid-wrapper.is-hovering .work-card:not(.hovered-card) {
+      filter: blur(16px);
+      opacity: 0.35;
+      transform: scale(0.985);
+    }
+
+    .work-grid-wrapper.is-hovering .work-default-heading {
+      filter: blur(18px);
+      opacity: 0;
+    }
+
+    .work-card {
+      transition: filter 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    /* =========================================================================
+       9. ABOUT: WHY US, 3-STAGE MEDIA ITEMS & DIFFERENCE BLEND STAGES
+       ========================================================================= */
+    .why-us-blend-stage, .blend-section-stage {
+      position: relative;
+      background-color: #ffffff;
+      isolation: isolate;
+      z-index: 25;
+    }
+
+    .why-us-sticky-header, .blend-sticky-header {
+      position: sticky;
+      top: 12px;
+      left: 0;
+      z-index: 30;
+      color: #ffffff;
+      mix-blend-mode: difference;
+      pointer-events: none;
+    }
+
+    .why-us-manifesto-blend {
+      position: relative;
+      z-index: 20;
+      color: #ffffff;
+      mix-blend-mode: difference;
+    }
+
+    .about-stage-thumb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      overflow: hidden;
+      background: #e4e4e7;
+      clip-path: inset(100% 0% 0% 0%);
+      will-change: transform, width, height, clip-path, opacity;
+    }
+
+    @keyframes marqueeLeft {
+      0% { transform: translate3d(0%, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+    @keyframes marqueeRight {
+      0% { transform: translate3d(-50%, 0, 0); }
+      100% { transform: translate3d(0%, 0, 0); }
+    }
+    .marquee-track-left {
+      display: flex;
+      width: max-content;
+      animation: marqueeLeft 22s linear infinite;
+    }
+    .marquee-track-right {
+      display: flex;
+      width: max-content;
+      animation: marqueeRight 22s linear infinite;
+    }
+
+    /* HU(E)MANS Gradient Cards */
+    @keyframes auraShift {
+      0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+      50% { background-position: 100% 50%; filter: hue-rotate(15deg); }
+      100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+    }
+    .aura-card-1 {
+      background: radial-gradient(circle at 30% 30%, #a200ff, #ff006a 45%, #ff8c42 82%, #ffffff 100%);
+      background-size: 180% 180%;
+      animation: auraShift 9s ease infinite;
+    }
+    .aura-card-2 {
+      background: radial-gradient(circle at 65% 35%, #ff1e42, #ff7b00 50%, #ffdf6b 85%, #fff5eb 100%);
+      background-size: 180% 180%;
+      animation: auraShift 11s ease infinite reverse;
+    }
+    .aura-card-3 {
+      background: radial-gradient(circle at 50% 55%, #ff6b2b, #ffb86c 42%, #8ec5fc 78%, #d9e8ff 100%);
+      background-size: 180% 180%;
+      animation: auraShift 10s ease infinite;
+    }
+
+    /* =========================================================================
+       10. CONTACT / MOBILE MENU OVERLAY (SOLID BLACK #000000, Z-INDEX 90)
+       ========================================================================= */
+    #contactOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      pointer-events: none;
+      background-color: #000000;
+      color: #ffffff;
+      opacity: 0;
+      transition: opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #contactOverlay.is-open {
+      pointer-events: auto;
+      background-color: #000000;
+      opacity: 1;
+    }
+
+    #contactOverlay.is-closing {
+      pointer-events: none;
+      background-color: #000000;
+      opacity: 0;
+    }
+
+    #contactWordStage {
+      position: absolute;
+      left: 16px;
+      top: 57.5vh;
+      pointer-events: none;
+    }
+
+    #contactAnimatedHeading {
+      font-size: clamp(3.8rem, 13.4vw, 14.5rem);
+      line-height: 0.82;
+      letter-spacing: -0.052em;
+      color: #ffffff;
+      will-change: transform, opacity;
+      transform-origin: 0% 100%;
+      transform: translate3d(0, 42px, 0) scale(0.14);
+      opacity: 0;
+      transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.64s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #contactOverlay.is-open #contactAnimatedHeading {
+      transform-origin: 0% 100%;
+      transform: translate3d(0, 0px, 0) scale(1);
+      opacity: 1;
+    }
+
+    #contactOverlay.is-closing #contactAnimatedHeading {
+      transform-origin: 0% 100%;
+      transform: translate3d(0, 42px, 0) scale(0.14);
+      opacity: 0;
+    }
+
+    #contactFooterColumns {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+      transition: opacity 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.58s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #contactOverlay.is-open #contactFooterColumns {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    #contactOverlay.is-closing #contactFooterColumns {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+
+    /* =========================================================================
+       11. MINIMALIST BILINGUAL PILL SWITCH (ES / EN) & INVERTED OVERLAY VARIANT
+       ========================================================================= */
+    .lang-switch-pill {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      width: 68px;
+      height: 26px;
+      padding: 2px;
+      border: 1.5px solid #000000;
+      border-radius: 9999px;
+      background: transparent;
+      cursor: pointer;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .lang-switch-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: calc(50% - 2px);
+      height: calc(100% - 4px);
+      background-color: #000000;
+      border-radius: 9999px;
+      transform: translate3d(0%, 0, 0);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+
+    .lang-switch-pill.is-en .lang-switch-thumb {
+      transform: translate3d(100%, 0, 0);
+    }
+
+    .lang-switch-label {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      font-family: var(--font-grotesque);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      transition: color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .lang-switch-pill:not(.is-en) .lang-switch-label[data-lang-opt="es"],
+    .lang-switch-pill.is-en .lang-switch-label[data-lang-opt="en"] {
+      color: #ffffff;
+    }
+
+    .lang-switch-pill:not(.is-en) .lang-switch-label[data-lang-opt="en"],
+    .lang-switch-pill.is-en .lang-switch-label[data-lang-opt="es"] {
+      color: #000000;
+    }
+
+    /* Inverted White Pill Switch for Black #contactOverlay */
+    .lang-switch-pill.lang-switch-inverted {
+      border-color: #ffffff;
+    }
+    .lang-switch-pill.lang-switch-inverted .lang-switch-thumb {
+      background-color: #ffffff;
+    }
+    .lang-switch-pill.lang-switch-inverted:not(.is-en) .lang-switch-label[data-lang-opt="es"],
+    .lang-switch-pill.lang-switch-inverted.is-en .lang-switch-label[data-lang-opt="en"] {
+      color: #000000;
+    }
+    .lang-switch-pill.lang-switch-inverted:not(.is-en) .lang-switch-label[data-lang-opt="en"],
+    .lang-switch-pill.lang-switch-inverted.is-en .lang-switch-label[data-lang-opt="es"] {
+      color: #ffffff;
+    }
+
+    /* =========================================================================
+       12. RESPONSIVE FOOTER LAYOUT (5-STACK MOBILE / 4-COL DESKTOP)
+       ========================================================================= */
+    .footer-block-social,
+    .footer-block-legal {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 640px) {
+      .footer-responsive-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem; /* gap-6 */
+        font-size: 0.875rem; /* text-sm */
+        font-weight: 700;
+        width: 100%;
+      }
+
+      .footer-block-clocks,
+      .footer-block-contact,
+      .footer-block-lang,
+      .footer-block-social,
+      .footer-block-legal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (min-width: 641px) {
+      .footer-responsive-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        column-gap: 1.5rem;
+        row-gap: 0.5rem;
+      }
+
+      .footer-block-clocks {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+      }
+
+      .footer-block-contact {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+      }
+
+      .footer-block-social {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        justify-content: flex-end;
+      }
+
+      .footer-block-lang {
+        grid-column: 4;
+        grid-row: 1;
+        justify-self: end;
+        align-self: start;
+      }
+
+      .footer-block-legal {
+        grid-column: 4;
+        grid-row: 2;
+        justify-self: end;
+        align-self: end;
+        text-align: right;
+        align-items: flex-end;
+      }
+    }
+
+    /* =========================================================================
+       13. BIO VIDEO FRAME & RESPONSIVE TYPOGRAPHY CLASSES
+       ========================================================================= */
+    .lets-raise-heading {
+      font-size: clamp(6rem, 14.2vw, 15.8rem);
+      line-height: 0.82;
+    }
+
+    .preservation-heading {
+      font-size: clamp(3.5rem, 10.6vw, 11.4rem);
+    }
+
+    .about-bio-video-frame {
+      border: 6px solid #ffffff;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 20;
+    }
+
+    /* =========================================================================
+       14. MOBILE HAMBURGER BUTTON & OVERLAY NAVIGATION (MAX-WIDTH: 768PX)
+       ========================================================================= */
+    .mobile-burger-btn {
+      display: none;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 100 !important; /* Strictly above #contactOverlay (90) and #unifiedAxisLayer (92) */
+      pointer-events: auto !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      color: #ffffff;
+      mix-blend-mode: difference;
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    /* Solid white while scrolling over Home Reel videos */
+    .mobile-burger-btn.is-reel-solid {
+      mix-blend-mode: normal;
+      color: #ffffff;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.45));
+    }
+
+    /* Pure white 'X' on top of solid black #contactOverlay */
+    .mobile-burger-btn.is-active {
+      mix-blend-mode: normal !important;
+      color: #ffffff !important;
+      filter: none !important;
+    }
+
+    .burger-line {
+      display: block;
+      width: 26px;
+      height: 2.2px;
+      background-color: currentColor;
+      border-radius: 2px;
+      transform-origin: center;
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, opacity;
+    }
+
+    .mobile-burger-btn.is-active .line-1 {
+      transform: translate3d(0, 8.2px, 0) rotate(45deg);
+    }
+    .mobile-burger-btn.is-active .line-2 {
+      opacity: 0;
+      transform: scaleX(0.2);
+    }
+    .mobile-burger-btn.is-active .line-3 {
+      transform: translate3d(0, -8.2px, 0) rotate(-45deg);
+    }
+
+    .mobile-overlay-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      /* 1. Hide desktop horizontal navigation & giant CONTACT word in mobile overlay */
+      .top-nav-blend {
+        display: none !important;
+      }
+
+      #contactWordStage,
+      #contactAnimatedHeading {
+        display: none !important;
+      }
+
+      /* Show animated hamburger button */
+      .mobile-burger-btn {
+        display: inline-flex;
+      }
+
+      /* Upper Mobile Navigation Links inside #contactOverlay */
+      .mobile-overlay-nav {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        padding-left: 1rem;
+        z-index: 94;
+        opacity: 0;
+        transform: translate3d(0, -16px, 0);
+        transition: opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+      }
+
+      #contactOverlay.is-open .mobile-overlay-nav {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+        pointer-events: auto;
+      }
+
+      #contactOverlay.is-closing .mobile-overlay-nav {
+        opacity: 0;
+        transform: translate3d(0, -16px, 0);
+        pointer-events: none;
+      }
+
+      .mobile-overlay-link {
+        background: transparent;
+        border: none;
+        padding: 0;
+        text-align: left;
+        font-size: 3rem; /* text-5xl */
+        line-height: 1;  /* leading-none */
+        letter-spacing: -0.048em;
+        color: #ffffff;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.25s ease;
+      }
+
+      .mobile-overlay-link:active,
+      .mobile-overlay-link:hover {
+        opacity: 0.7;
+        transform: translate3d(6px, 0, 0);
+      }
+
+      /* 2. Home / Reel ("Pure visual art - frame.") mobile scaling & alignment */
+      .lets-raise-heading {
+        font-size: clamp(4.15rem, 15.2vw, 6.4rem) !important;
+        line-height: 0.86 !important;
+        letter-spacing: -0.045em;
+      }
+
+      #letsRaiseStickySlide {
+        padding-top: 4vh !important;
+      }
+
+      /* 3. Why Us initial clearance below the 50vh '&' axis on mobile */
+      #whyUsManifestoContainer {
+        margin-top: 46vh !important;
+        padding-top: 4vh;
+      }
+
+      /* 4. About Bio video container border & bottom separation from scrolling text */
+      .about-bio-video-frame {
+        border: 6px solid #ffffff;
+        margin-bottom: 18px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      #aboutBioTextScroll {
+        padding-top: 6vh !important;
+      }
+
+      /* 5. Preservation heading overflow fix ("PRESERVATION" / "PRESERVACIÓN") */
+      .preservation-heading {
+        font-size: clamp(2.15rem, 10.1vw, 4.4rem) !important;
+        letter-spacing: -0.052em;
+        line-height: 0.88;
+        max-width: 94vw;
+        overflow-wrap: normal;
+      }
+    }
