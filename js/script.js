@@ -254,8 +254,6 @@ let hudTopWords = [];
 let hudRightWords = [];
 let reelSlideEls = [];
 let reelSlideInners = [];
-let reelVideos = [];
-let reelDimmers = [];
 let letsRaiseSlideEl = null;
 let srvBlackLeft = [], srvBlackRight = [];
 let srvOrangeLeft = [], srvOrangeRight = [];
@@ -293,65 +291,6 @@ function easeOutBackGraceful(t) {
   const c1 = 0.28;
   const c3 = c1 + 1;
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-}
-
-/* ---------------------------------------------------------------------
-   SMART VIDEO PLAYBACK MANAGER (SOLO 1 DECODIFICADOR ACTIVO A LA VEZ)
-   --------------------------------------------------------------------- */
-function safePlayVideo(vid) {
-  if (!vid) return;
-  if (vid.preload === 'none') {
-    vid.preload = 'metadata';
-  }
-  if (vid.paused) {
-    vid.muted = true;
-    const p = vid.play();
-    if (p !== undefined) {
-      p.catch(() => {});
-    }
-  }
-}
-
-function safePauseVideo(vid) {
-  if (vid && !vid.paused) {
-    vid.pause();
-  }
-}
-
-function pauseAllVideos() {
-  document.querySelectorAll('video').forEach(vid => {
-    if (!vid.paused) vid.pause();
-  });
-}
-
-function manageHomeReelVideos(f) {
-  const total = REEL_CAMPAIGNS.length;
-
-  // Si ya bajamos más allá del Reel o el menú móvil está abierto, pausamos todos los del reel
-  if (currentView !== 'home' || contactOpen || f > total - 0.15) {
-    for (let i = 0; i < total; i++) {
-      safePauseVideo(reelVideos[i]);
-    }
-    return;
-  }
-
-  const primaryIdx = clamp(Math.round(f), 0, total - 1);
-  const nextWarmupIdx = clamp(Math.floor(f) + 1, 0, total - 1);
-
-  for (let i = 0; i < total; i++) {
-    const vid = reelVideos[i];
-    if (!vid) continue;
-
-    if (i === primaryIdx) {
-      safePlayVideo(vid);
-    } else {
-      safePauseVideo(vid);
-      // Pre-cargamos metadatos solo del próximo video inmediato para evitar tirones al scrollear
-      if (i === nextWarmupIdx && vid.preload === 'none') {
-        vid.preload = 'metadata';
-      }
-    }
-  }
 }
 
 /* ---------------------------------------------------------------------
@@ -398,20 +337,19 @@ function buildHomeStickyWipeReel() {
   let slidesHtml = '';
 
   REEL_CAMPAIGNS.forEach((item, idx) => {
-    const preloadMode = idx === 0 ? 'auto' : (idx === 1 ? 'metadata' : 'none');
     slidesHtml += `
       <div class="reel-sticky-slide campaign-sticky-slide" id="reelStickySlide-${idx}" data-slide-idx="${idx}" style="z-index: ${idx + 1};">
         <div class="reel-slide-media-inner" id="reelMediaInner-${idx}">
           <video
-            id="reelVideo-${idx}"
             src="${item.video}"
+            autoplay
             loop
             muted
             playsinline
-            preload="${preloadMode}"
+            preload="auto"
             class="reel-shot-frame active-frame"
           ></video>
-          <div id="reelDimmer-${idx}" class="reel-dimmer-layer"></div>
+          <div class="absolute inset-0 bg-black/15 pointer-events-none"></div>
         </div>
       </div>
     `;
@@ -464,23 +402,20 @@ function buildHomeStickyWipeReel() {
   hudRightWords = REEL_CAMPAIGNS.map((_, idx) => document.getElementById(`hudRightWord-${idx}`));
   reelSlideEls = REEL_CAMPAIGNS.map((_, idx) => document.getElementById(`reelStickySlide-${idx}`));
   reelSlideInners = REEL_CAMPAIGNS.map((_, idx) => document.getElementById(`reelMediaInner-${idx}`));
-  reelVideos = REEL_CAMPAIGNS.map((_, idx) => document.getElementById(`reelVideo-${idx}`));
-  reelDimmers = REEL_CAMPAIGNS.map((_, idx) => document.getElementById(`reelDimmer-${idx}`));
   letsRaiseSlideEl = document.getElementById('letsRaiseStickySlide');
 }
 
 /* ---------------------------------------------------------------------
-   ENSURE ONLY VISIBLE VIEW VIDEOS PLAY
+   ENSURE ALL LOCAL VIDEOS AUTOPLAY RELIABLY
    --------------------------------------------------------------------- */
 function ensureLocalVideosPlaying() {
-  if (currentView === 'home') {
-    const vh = window.innerHeight || 1;
-    const stepVh = vh * REEL_SCROLL_STEP;
-    const f = (window.scrollY || 0) / stepVh;
-    manageHomeReelVideos(f);
-  } else {
-    pauseAllVideos();
-  }
+  document.querySelectorAll('video').forEach(vid => {
+    vid.muted = true;
+    const playPromise = vid.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {});
+    }
+  });
 }
 
 /* ---------------------------------------------------------------------
@@ -593,7 +528,6 @@ function buildWorkGrid() {
         <img
           src="${proj.img}"
           alt="${proj.title}"
-          loading="lazy"
           class="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
         />
         ${proj.badge ? `
@@ -723,9 +657,6 @@ function switchView(targetView) {
   isViewTransitioning = true;
   updateNavUnderline(targetView);
 
-  // Pausamos todos los videos antes de aplicar blur(30px) a la vista para que la transición sea 60fps en móvil
-  pauseAllVideos();
-
   const stage = document.getElementById('mainViewStage');
   const reelHud = document.getElementById('reelHudFixed');
 
@@ -798,7 +729,6 @@ function toggleContactOverlay(forceState) {
 
   if (nextState) {
     contactOpen = true;
-    pauseAllVideos();
     overlay.classList.remove('is-closing');
     overlay.classList.add('is-open');
     updateNavUnderline('contact');
@@ -809,7 +739,6 @@ function toggleContactOverlay(forceState) {
     overlay.classList.add('is-closing');
     updateNavUnderline(currentView);
     updateMobileBurgerState(window.innerWidth, window.innerHeight, window.scrollY || 0);
-    ensureLocalVideosPlaying();
 
     contactCloseTimer = setTimeout(() => {
       overlay.classList.remove('is-closing');
@@ -934,7 +863,7 @@ function tickMasterChoreography(now) {
   // Update mobile hamburger button blend state
   updateMobileBurgerState(vw, vh, reelSmoothScrollY);
 
-  // 1. Update Unified GPU Axis (Scroll Collapse A ... & ... T ONLY on mobile)
+  // 1. Update Unified GPU Axis (with Scroll Collapse A ... & ... T)
   const footerProgress = updateUnifiedAxisGPU(vw, vh, rawScrollY);
   const partingActiveMultiplier = 1 - smoothstep(0.05, 0.35, footerProgress);
 
@@ -953,7 +882,7 @@ function tickMasterChoreography(now) {
 }
 
 /* ---------------------------------------------------------------------
-   1. UNIFIED GPU AXIS: ARCHIVE — & — VAULT + MOBILE-ONLY SCROLL COLLAPSE
+   1. UNIFIED GPU AXIS: ARCHIVE — & — VAULT + SCROLL COLLAPSE (A & T)
    --------------------------------------------------------------------- */
 function updateUnifiedAxisGPU(vw, vh, rawScrollY) {
   const elL = document.getElementById('axisLeft');
@@ -986,6 +915,7 @@ function updateUnifiedAxisGPU(vw, vh, rawScrollY) {
   const xRightGiantJoined  = xCenterGiantJoined + wCenterGiant + gapGiant;
 
   // When Contact Overlay is open on mobile, position the axis in the middle third (37vh)
+  // so it never overlaps the upper navigation links or the lower stacked footer.
   const yMidBaseline = (contactOpen && vw <= 768)
     ? (vh * 0.37) + (40 * scaleWordsSmall)
     : (vh * 0.5) + (40 * scaleWordsSmall);
@@ -1062,10 +992,12 @@ function updateUnifiedAxisGPU(vw, vh, rawScrollY) {
     axisLayer.classList.remove('blend-overlay-white');
   }
 
-  // 4. Scroll Collapse Animation (EXCLUSIVO PARA MÓVILES: vw <= 768):
-  // En PC (vw > 768), collapseFactor se mantiene en 0 para que "ARCHIVE" y "VAULT" siempre se vean completas.
+  // 4. Scroll Collapse Animation:
+  // As scrolling begins, ARCHIVE clips from right-to-left leaving only 'A',
+  // and VAULT clips from left-to-right leaving only the final 'T'.
+  // At scrollY === 0 (or when Contact Overlay is open / Footer Dock is active), both expand back.
   let collapseFactor = 0;
-  if (vw <= 768 && preloaderCurrent >= 0.999 && !contactOpen) {
+  if (preloaderCurrent >= 0.999 && !contactOpen) {
     const scrollProgress = smoothScrollY / Math.max(1, vh);
     const collapseIn = smoothstep(0.02, 0.15, scrollProgress);
     const collapseOutFooter = 1 - smoothstep(0.02, 0.22, footerProgress);
@@ -1102,13 +1034,9 @@ function updateHomeReelHUD(vw, vh, scrollY) {
   const stepRemainderPx = vh - stepVh;
   const f = clamp(scrollY / stepVh, 0, totalCampaigns + 0.5);
 
-  // Activa únicamente el decodificador de video del slide visible
-  manageHomeReelVideos(f);
-
   for (let idx = 0; idx < totalCampaigns; idx++) {
     const slideEl = reelSlideEls[idx];
     const mediaInner = reelSlideInners[idx];
-    const dimmer = reelDimmers[idx];
 
     if (slideEl && idx > 0) {
       const unstickOffset = Math.max(0, idx - f) * stepRemainderPx;
@@ -1126,17 +1054,17 @@ function updateHomeReelHUD(vw, vh, scrollY) {
       const easedIn = smootherstep(0, 1, wipeInP);
       const sc = lerp(1.12, 1.0, easedIn);
       const yShift = lerp(-vh * 0.14, 0, easedIn);
-      const dimOp = lerp(0.32, 0.15, easedIn);
+      const bright = lerp(0.82, 1.0, easedIn);
       mediaInner.style.transform = `translate3d(0, ${yShift.toFixed(2)}px, 0) scale(${sc.toFixed(4)})`;
-      if (dimmer) dimmer.style.opacity = dimOp.toFixed(3);
+      mediaInner.style.filter = `brightness(${bright.toFixed(3)})`;
     } else {
       const coverP = clamp(rel, 0, 1);
       const easedCover = smootherstep(0, 1, coverP);
       const sc = lerp(1.0, 0.94, easedCover);
       const yShift = lerp(0, -vh * 0.12, easedCover);
-      const dimOp = lerp(0.15, 0.52, easedCover);
+      const bright = lerp(1.0, 0.58, easedCover);
       mediaInner.style.transform = `translate3d(0, ${yShift.toFixed(2)}px, 0) scale(${sc.toFixed(4)})`;
-      if (dimmer) dimmer.style.opacity = dimOp.toFixed(3);
+      mediaInner.style.filter = `brightness(${bright.toFixed(3)})`;
     }
   }
 
@@ -1227,7 +1155,6 @@ function updateHomeServicesSplit(vw, vh) {
   const photoBox = document.getElementById('servicesPhotoBox');
   const blackLayer = document.getElementById('servicesBlackLayer');
   const orangeLayer = document.getElementById('servicesOrangeInner');
-  const srvVid = document.getElementById('servicesVideo');
   if (!section || !trackWrapper || !photoBox || !blackLayer || !orangeLayer) return;
 
   const rows = blackLayer.querySelectorAll('.service-row-line');
@@ -1245,14 +1172,7 @@ function updateHomeServicesSplit(vw, vh) {
   trackWrapper.style.paddingBottom = `${maxPinTravel.toFixed(1)}px`;
 
   const trackRect = trackWrapper.getBoundingClientRect();
-  const isSrvVisible = trackRect.bottom >= -200 && trackRect.top <= vh + 200;
-
-  if (!isSrvVisible || contactOpen) {
-    safePauseVideo(srvVid);
-    return;
-  }
-
-  safePlayVideo(srvVid);
+  if (trackRect.bottom < -200 || trackRect.top > vh + 200) return;
 
   const unpinnedBoxCenterY = trackRect.top + boxH * 0.5;
   const scrollPastCenter = halfVh - unpinnedBoxCenterY;
@@ -1405,12 +1325,10 @@ function updateWhyUsCircularParting(vw, vh, activationMultiplier = 1) {
    --------------------------------------------------------------------- */
 function updateAboutSynchronizedScroll(vw, vh) {
   const stickyTrack = document.getElementById('aboutStickyTrack');
-  const aboutStageVid = document.getElementById('aboutStageVideo');
-  const aboutBioVid = document.getElementById('aboutBioVideo');
+  const whyUsHeading = document.getElementById('whyUsHeading');
 
   if (stickyTrack) {
     const tRect = stickyTrack.getBoundingClientRect();
-    const isTrackInView = tRect.bottom >= -150 && tRect.top <= vh + 150;
     const scrollable = Math.max(1, tRect.height - vh);
     const rawP = clamp(-tRect.top / scrollable, 0, 1);
 
@@ -1419,24 +1337,6 @@ function updateAboutSynchronizedScroll(vw, vh) {
       aboutSmoothP = rawP;
     }
     const p = aboutSmoothP;
-
-    // Gestión de reproducción bajo demanda de los 2 videos en About
-    if (!isTrackInView || contactOpen) {
-      safePauseVideo(aboutStageVid);
-      safePauseVideo(aboutBioVid);
-    } else {
-      if (p > 0.001 && p < 0.65) {
-        safePlayVideo(aboutStageVid);
-      } else {
-        safePauseVideo(aboutStageVid);
-      }
-
-      if (p > 0.52) {
-        safePlayVideo(aboutBioVid);
-      } else {
-        safePauseVideo(aboutBioVid);
-      }
-    }
 
     const phase1Heading = document.getElementById('aboutPhase1Heading');
     const marqueeWall = document.getElementById('aboutMarqueeWall');
