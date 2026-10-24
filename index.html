@@ -89,11 +89,10 @@
             <video
               id="servicesVideo"
               src="https://res.cloudinary.com/yr21kkmn/video/upload/v1792806848/home_services.mp4"
-              autoplay
               loop
               muted
               playsinline
-              preload="auto"
+              preload="none"
               class="reel-shot-frame active-frame"
             ></video>
             <div class="absolute inset-0 bg-gradient-to-b from-[#0b5bb5]/35 via-transparent to-[#0b5bb5]/25 pointer-events-none"></div>
@@ -217,16 +216,24 @@
           <!-- Stages 1, 2 & 3: 4 Media Items -->
           <div id="aboutFourThumbsRow" class="absolute inset-0 z-25 pointer-events-none">
             <div id="aboutThumb0" class="about-stage-thumb" style="z-index: 40;">
-              <video src="https://res.cloudinary.com/yr21kkmn/video/upload/v1792806846/about.mp4" autoplay loop muted playsinline preload="auto" class="w-full h-full object-cover"></video>
+              <video
+                id="aboutStageVideo"
+                src="https://res.cloudinary.com/yr21kkmn/video/upload/v1792806846/about.mp4"
+                loop
+                muted
+                playsinline
+                preload="none"
+                class="w-full h-full object-cover"
+              ></video>
             </div>
             <div id="aboutThumb1" class="about-stage-thumb" style="z-index: 30;">
-              <img src="img/1.jpg" alt="About 1" class="w-full h-full object-cover" />
+              <img src="img/1.jpg" alt="About 1" loading="lazy" class="w-full h-full object-cover" />
             </div>
             <div id="aboutThumb2" class="about-stage-thumb" style="z-index: 20;">
-              <img src="img/2.jpg" alt="About 2" class="w-full h-full object-cover" />
+              <img src="img/2.jpg" alt="About 2" loading="lazy" class="w-full h-full object-cover" />
             </div>
             <div id="aboutThumb3" class="about-stage-thumb" style="z-index: 10;">
-              <img src="img/3.jpg" alt="About 3" class="w-full h-full object-cover" />
+              <img src="img/3.jpg" alt="About 3" loading="lazy" class="w-full h-full object-cover" />
             </div>
           </div>
 
@@ -240,12 +247,12 @@
                 <div class="col-span-9 sm:col-span-4 flex justify-center items-center pr-2 sm:pr-6">
                   <div id="aboutBioVideoCard" class="about-bio-video-frame w-36 sm:w-52 md:w-60 aspect-square overflow-hidden bg-white p-1.5 shadow-md">
                     <video
+                      id="aboutBioVideo"
                       src="https://res.cloudinary.com/yr21kkmn/video/upload/v1792806844/about_bio.mp4"
-                      autoplay
                       loop
                       muted
                       playsinline
-                      preload="auto"
+                      preload="none"
                       class="w-full h-full object-cover"
                     ></video>
                   </div>
